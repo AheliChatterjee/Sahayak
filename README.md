@@ -32,6 +32,7 @@ A reliability-first AI assistant that combines Retrieval-Augmented Generation (R
 ```
 agentic-enterprise-assistant/
 ├── app.py                 # Streamlit UI
+|__main.py                 # Entry point
 ├── requirements.txt       # Dependencies
 ├── data/                  # PDF documents
 ├── ingestion/             # PDF loading and chunking
