@@ -16,13 +16,13 @@ A reliability-first AI assistant that combines Retrieval-Augmented Generation (R
 
 ## Tech Stack
 
-* **IDE:** GitHub Codespaces
+* **Backend:** FastAPI
 * **UI:** Streamlit
 * **PDF Parsing:** PyPDF
 * **Chunking:** LangChain Text Splitters
 * **Embeddings:** sentence-transformers/all-MiniLM-L6-v2
 * **Vector Database:** ChromaDB
-* **LLM:** Hugging Face Inference API (Mistral-7B-Instruct)
+* **LLM:** Hugging Face Inference API (meta-Llama-3-8B-instruct)
 * **Agent Logic:** Custom Python routing
 
 ---
@@ -32,81 +32,113 @@ A reliability-first AI assistant that combines Retrieval-Augmented Generation (R
 ```
 agentic-enterprise-assistant/
 ├── app.py                 # Streamlit UI
-|__main.py                 # Entry point
+|__main.py                 # FastAPI backend Entry  point
 ├── requirements.txt       # Dependencies
 ├── data/                  # PDF documents
 ├── ingestion/             # PDF loading and chunking
 ├── rag/                   # Vector store and RAG pipeline
 ├── agent/                 # Intent router and controller
 ├── actions/               # Action prompts and handlers
-└── README.md              # Project summary
+└── README.md              # Project documentation
 ```
 
 ---
 
 ## Setup
 
-1. Open the repository in **GitHub Codespaces**
-2. Install dependencies:
+1. Clone the repository
+git clone <https://github.com/AheliChatterjee/Sahayak>
+cd agentic-enterprise-assistant
 
-```
+2. Create virtual environment
+python -m venv venv
+
+Activate:
+
+venv\Scripts\activate
+
+3. Install dependencies
 pip install -r requirements.txt
-```
 
-3. Add Hugging Face token as Codespaces secret:
+4. Add Hugging Face Token
 
-```
-HF_TOKEN=<your_token>
-```
+Set environment variable:
 
-4. Run the application:
+HF_TOKEN=<your_huggingface_token>
 
-```
+## Running the Application
+
+Run Backend API
+uvicorn main:app
+
+Backend will start at:
+
+http://127.0.0.1:8000
+
+API documentation:
+
+http://127.0.0.1:8000/docs
+
+## Run Streamlit UI (Optional)
+
 streamlit run app.py
-```
+API Endpoint
+Chat Endpoint
+POST /chat
+Request
+{
+  "query": "What are the key risks mentioned in the report?"
+}
+Response
+{
+  "response": "Generated answer from RAG pipeline"
+}
 
 ---
 
 ## System Architecture
-
-```
-┌─────────────────────────────┐
-│        Streamlit UI         │
-│   (User Query Interface)    │
-└──────────────┬──────────────┘
-               │ User Input
-               ▼
-┌─────────────────────────────┐
-│      Intent Router          │
-│ (Info Query / Action Mode)  │
-└───────┬───────────┬─────────┘
-        │           │
-        │           │
-        ▼           ▼
-┌──────────────┐   ┌────────────────┐
-│   RAG Mode   │   │  Action Mode   │
-│ (Doc Search │   │ (JSON Generator│
-│  + Citation)│   │  via LLM)       │
-└──────┬───────┘   └────────┬───────┘
-       │                    │
-       ▼                    ▼
-┌──────────────────┐   ┌──────────────────┐
-│  ChromaDB Vector │   │ HuggingFace LLM  │
-│  Store (Embeds)  │   │ (Mistral-Instruct│
-└──────┬───────────┘   └────────┬─────────┘
-       │ Retrieved Chunks        │ JSON Output
-       ▼                         ▼
-┌─────────────────────────────┐
-│ Citation-Grounded Answer OR │
-│ Deterministic Action JSON   │
-└─────────────────────────────┘
 ```
 
----
+                ┌──────────────────────┐
+                │      Frontend        │
+                │ (Streamlit / Web UI) │
+                └──────────┬───────────┘
+                           │
+                           ▼
+                ┌──────────────────────┐
+                │      FastAPI API     │
+                │       /chat          │
+                └──────────┬───────────┘
+                           │
+                           ▼
+                ┌──────────────────────┐
+                │    Agent Controller  │
+                │  (Intent Routing)    │
+                └───────┬────────┬─────┘
+                        │        │
+                        ▼        ▼
+                ┌────────────┐ ┌─────────────┐
+                │   RAG Mode │ │ Action Mode │
+                │ Doc Search │ │ JSON Output │
+                └──────┬─────┘ └──────┬──────┘
+                       │              │
+                       ▼              ▼
+             ┌────────────────┐ ┌───────────────┐
+             │ Chroma Vector  │ │ Llama-3 LLM   │
+             │ Database       │ │ Inference API │
+             └──────┬─────────┘ └──────┬────────┘
+                    │ Retrieved Docs    │
+                    ▼                   ▼
+          ┌─────────────────────────────────┐
+          │ Citation-Grounded Answer OR    │
+          │ Deterministic Action JSON      │
+          └─────────────────────────────────┘
+          
+```
 
 ## How It Works
 
-1. User enters a query in the Streamlit interface
+1. User submits a query via UI or API
 2. Intent router classifies query:
 
    * Informational → RAG pipeline
