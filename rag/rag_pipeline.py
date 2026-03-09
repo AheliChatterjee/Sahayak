@@ -5,10 +5,15 @@ from rag.llm_client import call_llm
 
 
 # Load existing vector database
-collection = load_vector_store()
+collection = None
 
 
 def answer_question(question: str) -> str:
+    global collection
+    
+    if collection is None:
+        collection = load_vector_store()
+        
     results = collection.query(
         query_texts=[question],
         n_results=3
@@ -21,4 +26,5 @@ def answer_question(question: str) -> str:
     prompt = build_prompt(question, context)
 
     response = call_llm(prompt)
+
     return response
