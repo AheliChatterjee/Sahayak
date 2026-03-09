@@ -1,6 +1,5 @@
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
-from agent.agent_controller import handle_user_input
 
 app = FastAPI(
     title="Agentic Enterprise Assistant API",
@@ -23,6 +22,7 @@ def health():
 @app.post("/chat")
 def chat(request: QueryRequest):
     try:
+        from agent.agent_controller import handle_user_input
         response = handle_user_input(request.query)
         return {"response": response}
     except Exception as e:
